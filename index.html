@@ -123,34 +123,53 @@
   </footer>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwSWUSUnQdbt1-5ckmHy-0aYri_R_kjd6Nvg3Ha-RqRrH8DcmWajsvmE3Y8W9Chs_k/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwtlFoYx64zpMzJ1-KQIYeKx_Rgj2Kpm5wTM87otrLnEcP9kVJcxJ5qB6xNG8eIqvYe/exec";
 
     function registrarPresenca(matricula, nome, turma, horarioEntrada) {
-      const dataAtual = new Date().toLocaleDateString('pt-BR');
-      const horaAtual = new Date().toLocaleTimeString('pt-BR');
+  const dataAtual = new Date().toLocaleDateString('pt-BR');
+  const horaAtual = new Date().toLocaleTimeString('pt-BR');
 
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          matricula: matricula,
-          nome: nome,
-          turma: turma,
-          data: dataAtual,
-          horarioEntrada: horarioEntrada,
-          horaLeitura: horaAtual
-        })
-      });
+  // ✅ Criar pergunta sobre lanche
+  const desejaLanche = confirm(`Aluno: ${nome}\nMatricula: ${matricula}\n\nDeseja lanchar? Clique em OK para SIM ou Cancelar para NÃO.`);
+  const lanche = desejaLanche ? "SIM" : "NÃO";
 
-      document.getElementById("log").innerText = `✅ Presença registrada:\n${nome} (${matricula})`;
-      setTimeout(() => {
-        document.getElementById("log").innerText = "";
-        iniciarLeitor();
-      }, 3000);
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      matricula,
+      nome,
+      turma,
+      data: dataAtual,
+      horarioEntrada,
+      horaLeitura: horaAtual,
+      lanche // ✅ Envia a resposta para a planilha
+    })
+  })
+  .then(res => res.text())
+  .then(resposta => {
+    const logDiv = document.getElementById("log");
+    logDiv.style.fontSize = "1.4rem"; // ✅ aumenta a fonte
+    if (resposta.trim() === "DUPLICADO") {
+      logDiv.innerText = `⚠️ Aluno ${nome} já marcou presença hoje.`;
+    } else {
+      logDiv.innerText = `✅ Presença registrada:\n${nome} (${matricula})\nLanche: ${lanche}`;
     }
+    setTimeout(() => {
+      logDiv.innerText = "";
+      logDiv.style.fontSize = "1rem";
+      iniciarLeitor();
+    }, 4000);
+  })
+  .catch(err => {
+    document.getElementById("log").innerText = "❌ Erro ao registrar presença.";
+    console.error(err);
+  });
+}
+
 
     function enviarManual() {
       const matricula = document.getElementById("matricula").value;
