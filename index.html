@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Presença QR Code</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
+    #reader {
+      width: 300px;
+      margin: auto;
+    }
+    .log, #manual-form {
+      margin-top: 20px;
+    }
+    input {
+      margin: 5px;
+      padding: 8px;
+    }
+    button {
+      padding: 10px;
+      margin-top: 10px;
+    }
+  </style>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+  <h1>Registro de Presença</h1>
+
+  <div id="reader"></div>
+
+  <div id="manual-form" style="display:none;">
+    <h3>Leitura falhou? Insira os dados manualmente</h3>
+    <input type="text" id="matricula" placeholder="Matrícula"><br>
+    <input type="text" id="nome" placeholder="Nome completo"><br>
+    <input type="text" id="turma" placeholder="Turma"><br>
+    <input type="time" id="horarioEntrada"><br>
+    <button onclick="enviarManual()">Registrar Manualmente</button>
+  </div>
+
+  <div class="log" id="log"></div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwSWUSUnQdbt1-5ckmHy-0aYri_R_kjd6Nvg3Ha-RqRrH8DcmWajsvmE3Y8W9Chs_k/exec";
+
+    function registrarPresenca(matricula, nome, turma, horarioEntrada) {
+      const dataAtual = new Date().toLocaleDateString('pt-BR');
+      const horaAtual = new Date().toLocaleTimeString('pt-BR');
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          matricula: matricula,
+          nome: nome,
+          turma: turma,
+          data: dataAtual,
+          horarioEntrada: horarioEntrada,
+          horaLeitura: horaAtual
+        })
+      });
+
+      document.getElementById("log").innerText = `✅ Presença registrada:\n${nome} (${matricula})`;
+      setTimeout(() => {
+        document.getElementById("log").innerText = "";
+        iniciarLeitor();
+      }, 3000);
+    }
+
+    function enviarManual() {
+      const matricula = document.getElementById("matricula").value;
+      const nome = document.getElementById("nome").value;
+      const turma = document.getElementById("turma").value;
+      const horarioEntrada = document.getElementById("horarioEntrada").value;
+
+      if (!matricula || !nome || !horarioEntrada) {
+        alert("Preencha todos os campos obrigatórios.");
+        return;
+      }
+
+      registrarPresenca(matricula, nome, turma, horarioEntrada);
+      document.getElementById("manual-form").style.display = "none";
+    }
+
+    let html5QrCode;
+
+    function iniciarLeitor() {
+      document.getElementById("manual-form").style.display = "none";
+      document.getElementById("reader").innerHTML = "";
+      html5QrCode = new Html5Qrcode("reader");
+
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        qrCodeMessage => {
+            const [matricula, nome, turma, horarioEntrada] = qrCodeMessage.split(';');
+
+
+          registrarPresenca(matricula, nome, turma, horarioEntrada);
+          html5QrCode.stop();
+        },
+        errorMessage => {
+          // Você pode exibir erros, se quiser
+        }
+      ).catch(err => {
+        document.getElementById("manual-form").style.display = "block";
+      });
+    }
+
+    iniciarLeitor();
+  </script>
+</body>
+</html>
+
