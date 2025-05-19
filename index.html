@@ -4,27 +4,67 @@
   <meta charset="UTF-8">
   <title>Presença QR Code</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 30px;
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+    margin: 0;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+
+  #reader {
+    width: 100%;
+    max-width: 400px;
+    margin: auto;
+  }
+
+  .log, #manual-form {
+    margin-top: 20px;
+    padding: 10px;
+    width: 100%;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  input, button {
+    width: 90%;
+    max-width: 400px;
+    padding: 10px;
+    margin: 8px 0;
+    font-size: 1rem;
+  }
+
+  button {
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #125a9c;
+  }
+
+  @media (max-width: 600px) {
+    h1 {
+      font-size: 1.5rem;
     }
-    #reader {
-      width: 300px;
-      margin: auto;
+
+    input, button {
+      font-size: 0.95rem;
     }
-    .log, #manual-form {
-      margin-top: 20px;
-    }
-    input {
-      margin: 5px;
-      padding: 8px;
-    }
-    button {
-      padding: 10px;
-      margin-top: 10px;
-    }
-  </style>
+  }
+</style>
+
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
 <body>
